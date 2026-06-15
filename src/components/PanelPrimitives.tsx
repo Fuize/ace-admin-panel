@@ -47,11 +47,11 @@ export function TableShell({ children, minWidth = "760px" }: { children: React.R
   );
 }
 
-export function EmptyState({ title, description }: { title: string; description?: string }) {
+export function EmptyState({ title, description, icon }: { title: string; description?: string; icon?: React.ReactNode }) {
   return (
     <div className="glass-soft relative overflow-hidden rounded-2xl border-dashed p-6 text-center" style={{ animation: "soft-pop .22s ease-out both" }}>
-      <div className="relative mx-auto mb-3 h-10 w-10 rounded-2xl border border-slate-600/60 bg-slate-900/70">
-        <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-300" />
+      <div className="relative mx-auto mb-3 grid h-10 w-10 place-items-center rounded-2xl border border-white/10 bg-white/[0.04]">
+        {icon ?? <div className="h-2 w-2 rounded-full bg-sky-300/60" />}
       </div>
       <div className="text-sm font-medium text-zinc-200">{title}</div>
       {description ? <div className="mt-1 text-sm text-zinc-300/75">{description}</div> : null}
@@ -88,6 +88,6 @@ export function TableSkeleton({ columns, rows = 5 }: { columns: number; rows?: n
 }
 
 export const tableHeadClass = "sticky top-0 z-10 bg-white/[0.055] text-zinc-100 backdrop-blur-2xl shadow-[inset_0_-1px_0_rgba(255,255,255,.10)]";
-export const thClass = "density-head whitespace-nowrap px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-300/90";
+export const thClass = "density-head whitespace-nowrap px-4 py-3.5 text-left text-[11px] font-semibold tracking-[0.05em] text-zinc-400";
 export const tdClass = "density-cell whitespace-nowrap px-4 py-3.5 text-zinc-200";
 export const rowClass = "border-t border-white/8 odd:bg-white/[0.018] even:bg-white/[0.035] transition-colors duration-150 hover:bg-sky-200/[0.07] hover:shadow-[inset_3px_0_0_rgba(125,211,252,.38)]";

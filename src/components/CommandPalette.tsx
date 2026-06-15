@@ -76,7 +76,7 @@ export function CommandPalette() {
           />
           <kbd className="hidden rounded-lg border border-white/10 bg-white/[0.05] px-2 py-1 text-[11px] text-zinc-300 sm:block">Esc</kbd>
         </div>
-        <div className="max-h-[52vh] overflow-y-auto p-2">
+        <div className="ace-scrollbar max-h-[52vh] overflow-y-auto p-2">
           {items.length === 0 ? (
             <div className="p-6 text-center">
               <Sparkles className="mx-auto h-5 w-5 text-indigo-200" />

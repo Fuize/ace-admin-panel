@@ -60,20 +60,14 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="mt-5 flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-xl border border-sky-300/20 bg-sky-400/10">
-              <Activity className="h-5 w-5 text-sky-200" />
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-zinc-50">Workspace Pulse</div>
-              <div className="text-sm text-zinc-300/75">Quick view of current admin state and visible tools.</div>
-            </div>
+          <div className="mt-5 border-t border-white/[0.06] pt-4">
+            <div className="mb-3 text-xs font-medium tracking-[0.05em] text-zinc-400">Current session</div>
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <MiniMetric icon={<Users className="h-4 w-4" />} label="Staff Online" value={onlineAdmins.length} />
-            <MiniMetric icon={<Shield className="h-4 w-4" />} label="Your Rank" value={admin?.roleLabel || "Admin"} color={admin?.roleColor} />
-            <MiniMetric icon={<MessageSquare className="h-4 w-4" />} label="Staff Chat" value={permissions.includes("staff_chat.send") ? "Send enabled" : "Read only"} />
+          <div className="grid gap-3 sm:grid-cols-3">
+            <MiniMetric icon={<Users className="h-4 w-4 text-sky-200" />} label="Staff Online" value={onlineAdmins.length} />
+            <MiniMetric icon={<Shield className="h-4 w-4 text-indigo-200" />} label="Your Rank" value={admin?.roleLabel || "Admin"} color={admin?.roleColor} />
+            <MiniMetric icon={<MessageSquare className="h-4 w-4 text-emerald-200" />} label="Staff Chat" value={permissions.includes("staff_chat.send") ? "Send enabled" : "Read only"} />
           </div>
         </Surface>
 
@@ -86,12 +80,12 @@ export default function DashboardPage() {
             {audit.length === 0 ? (
               <EmptyState title="No audit events yet" description="Audit events will appear here after policies and app flows are enabled." />
             ) : audit.map((row) => (
-              <div key={row.id} className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+              <div key={row.id} className="rounded-xl border border-white/[0.08] bg-white/[0.035] p-3 transition-colors duration-150 hover:border-sky-200/15 hover:bg-white/[0.055]">
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm font-medium text-zinc-100">{row.action}</div>
                   <div className="text-xs text-zinc-400">{new Date(row.created_at).toLocaleString()}</div>
                 </div>
-                <div className="mt-1 text-xs text-zinc-300/75">{actorName(row)} - {row.severity}</div>
+                <div className="mt-1 text-xs text-zinc-300/75">{actorName(row)} · {row.severity}</div>
               </div>
             ))}
           </div>
@@ -103,7 +97,7 @@ export default function DashboardPage() {
           <div className="text-sm font-semibold text-zinc-100">Online Staff</div>
           <div className="mt-4 space-y-2">
             {onlineAdmins.length === 0 ? <EmptyState title="No online staff shown" description="Presence updates appear when staff open the panel." /> : onlineAdmins.map((row) => (
-              <div key={row.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2">
+              <div key={row.id} className="flex items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.035] px-3 py-2 transition-colors duration-150 hover:border-sky-200/15 hover:bg-white/[0.055]">
                 <div>
                   <div className="text-sm font-medium text-zinc-100">{row.username}</div>
                   <div className="text-xs font-semibold" style={{ color: row.tagColor }}>{row.role}</div>
@@ -118,9 +112,9 @@ export default function DashboardPage() {
           <div className="text-sm font-semibold text-zinc-100">Future Sync Status</div>
           <div className="mt-4 grid gap-2">
             {["Players", "Vehicles", "Businesses", "Factions", "Map markers", "Server logs"].map((item) => (
-              <div key={item} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm">
-                <span className="text-zinc-200">{item}</span>
-                <span className="text-xs text-amber-200">Waiting for Supabase sync</span>
+              <div key={item} className="flex items-center justify-between rounded-xl border border-white/[0.08] bg-white/[0.035] px-3 py-2 text-sm">
+                <span className="text-zinc-300">{item}</span>
+                <span className="text-[11px] text-amber-300/80">Pending sync</span>
               </div>
             ))}
           </div>
@@ -133,8 +127,8 @@ export default function DashboardPage() {
 function MiniMetric({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string | number; color?: string }) {
   return (
     <div className="glass-soft rounded-xl p-3">
-      <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-zinc-300/65">{icon}{label}</div>
-      <div className="mt-2 truncate text-sm font-semibold text-zinc-50" style={color ? { color, textShadow: `0 0 14px ${color}70` } : undefined}>{value}</div>
+      <div className="flex items-center gap-2 text-[11px] font-medium tracking-[0.04em] text-zinc-400">{icon}{label}</div>
+      <div className="mt-2 truncate text-sm font-semibold text-zinc-50" style={color ? { color } : undefined}>{value}</div>
     </div>
   );
 }

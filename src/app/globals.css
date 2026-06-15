@@ -57,14 +57,23 @@ body { @apply bg-zinc-950 text-zinc-100; }
     pointer-events: none;
     background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.055) 18%, transparent 36%);
     transform: translateX(-120%);
-    animation: glass-shimmer 28s ease-in-out infinite;
+    animation: glass-shimmer 10s ease-in-out infinite;
   }
 
   .skeleton-shine {
-    background: linear-gradient(90deg, rgba(255,255,255,.045), rgba(255,255,255,.095), rgba(255,255,255,.045));
+    background: linear-gradient(90deg, rgba(255,255,255,.038), rgba(255,255,255,.085), rgba(255,255,255,.038));
     background-size: 220% 100%;
-    animation: skeleton-sweep 2.4s ease-in-out infinite;
+    animation: skeleton-sweep 1.6s ease-in-out infinite;
   }
+
+  .ace-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148,163,184,.18) transparent;
+  }
+  .ace-scrollbar::-webkit-scrollbar { width: 4px; }
+  .ace-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .ace-scrollbar::-webkit-scrollbar-thumb { background: rgba(148,163,184,.18); border-radius: 9999px; }
+  .ace-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148,163,184,.32); }
 
   html[data-density="compact"] .density-cell {
     padding-top: .55rem;

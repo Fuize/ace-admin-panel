@@ -45,7 +45,7 @@ export default function LoginPage() {
     }
   }
 
-  const inputClass = "mt-1 w-full rounded-lg border border-white/15 bg-zinc-950/70 px-4 py-3 text-sm text-zinc-100 shadow-inner shadow-black/20 transition placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950";
+  const inputClass = "mt-1 w-full rounded-xl border border-white/10 bg-zinc-950/70 px-4 py-3 text-sm text-zinc-100 shadow-inner shadow-black/20 transition-colors duration-150 placeholder:text-zinc-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950";
 
   return (
     <div className="relative grid min-h-screen place-items-center overflow-hidden bg-zinc-950 px-4 py-8">
@@ -56,7 +56,7 @@ export default function LoginPage() {
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
-        className="relative w-[430px] max-w-full rounded-xl border border-white/12 bg-zinc-950/72 p-6 shadow-[0_24px_90px_rgba(0,0,0,.55)] backdrop-blur-xl"
+        className="relative w-[430px] max-w-full rounded-2xl border border-white/10 bg-zinc-950/72 p-6 shadow-[0_24px_90px_rgba(0,0,0,.55)] backdrop-blur-xl"
       >
         <div className="flex items-center gap-3">
           <Image src={webIcon} alt="ACE" width={52} height={52} className="h-12 w-12 object-contain" priority />
@@ -82,7 +82,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg border border-sky-300/25 bg-sky-400/18 py-3 text-sm font-semibold text-sky-50 transition hover:bg-sky-400/25 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+            className="w-full rounded-xl border border-sky-300/25 bg-sky-400/18 py-3 text-sm font-semibold text-sky-50 transition-colors duration-150 hover:bg-sky-400/25 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
           >
             {loading ? "Logging in..." : "Login"}
           </button>

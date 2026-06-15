@@ -281,7 +281,7 @@ export function StaffChat() {
       <aside className="glass-panel-strong flex h-full max-h-screen flex-col overflow-hidden text-zinc-100">
       <div className="shrink-0 border-b border-white/10 bg-white/[0.025]">
         <div className="flex items-center gap-3 px-4 py-3">
-        <div className="grid h-9 w-9 place-items-center rounded-xl border border-slate-600/60 bg-slate-900/70">
+        <div className="grid h-9 w-9 place-items-center rounded-xl border border-white/10 bg-white/[0.055]">
           <MessageSquare className="h-4 w-4 text-sky-200" />
         </div>
         <div className="min-w-0">
@@ -314,7 +314,7 @@ export function StaffChat() {
         </div>
       </div>
 
-      <div ref={listRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
+      <div ref={listRef} className="ace-scrollbar min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
         {messages.length === 0 ? (
           <div className="glass-soft rounded-xl p-4 text-sm text-zinc-300/75">No staff messages yet.</div>
         ) : messages.map((message) => <ChatMessageBubble key={message.id} message={message} />)}
@@ -381,7 +381,7 @@ const ChatMessageBubble = memo(function ChatMessageBubble({ message }: { message
   const name = adminName(message.sender);
 
   return (
-    <div className="rounded-2xl border border-slate-700/70 bg-slate-900/46 p-3 transition-colors duration-200 hover:border-slate-500/70 hover:bg-slate-800/48" style={{ animation: "soft-pop .18s ease-out both" }}>
+    <div className="rounded-2xl border border-white/[0.08] bg-white/[0.035] p-3 transition-colors duration-150 hover:border-sky-200/15 hover:bg-white/[0.06]" style={{ animation: "soft-pop .18s ease-out both" }}>
       <div className="flex items-start gap-3">
         <div className="relative grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.07] text-xs font-bold text-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,.08)]">
           <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border border-zinc-950 bg-emerald-300" />

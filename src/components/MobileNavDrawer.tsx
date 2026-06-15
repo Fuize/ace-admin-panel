@@ -21,8 +21,8 @@ export function MobileNavDrawer() {
       <button type="button" className="absolute inset-0 bg-zinc-950/60 backdrop-blur-sm" aria-label="Close navigation" onClick={() => setMobileNavOpen(false)} />
       <aside className="glass-panel-strong absolute inset-y-0 left-0 w-[min(86vw,330px)] overflow-hidden rounded-r-3xl">
         <div className="flex items-center gap-3 border-b border-white/10 p-4">
-          <div className="grid h-10 w-10 place-items-center rounded-xl border border-indigo-300/25 bg-indigo-400/12">
-            <LayoutGrid className="h-5 w-5 text-indigo-200" />
+          <div className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.055]">
+            <LayoutGrid className="h-5 w-5 text-sky-200" />
           </div>
           <div className="min-w-0">
             <div className="text-sm font-semibold text-zinc-50">ACE Panel</div>

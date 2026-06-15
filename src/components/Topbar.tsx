@@ -3,6 +3,8 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { Activity, ChevronDown, Clock3, Command, LogOut, Menu, ShieldCheck, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { clsx } from "clsx";
 import { useAuth } from "@/components/AuthProvider";
 import { useUX } from "@/components/UXProvider";
 import { getSupabaseConfig } from "@/lib/supabase/client";
@@ -106,7 +108,7 @@ export function Topbar() {
           <button
             type="button"
             onClick={() => setProfileOpen((value) => !value)}
-          className="glass-soft flex min-w-0 items-center gap-3 rounded-xl px-3 py-2 text-right transition-colors hover:border-sky-200/20 hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+          className="glass-soft flex min-w-0 items-center gap-3 rounded-xl px-3 py-2 text-right transition-colors duration-150 hover:border-sky-200/20 hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
             aria-label="Open admin profile"
             aria-expanded={profileOpen}
           >
@@ -123,39 +125,47 @@ export function Topbar() {
                 <span className="block text-xs text-zinc-400">Authenticated session</span>
               )}
             </span>
-            <ChevronDown className="h-4 w-4 text-zinc-400" />
+            <ChevronDown className={clsx("h-4 w-4 text-zinc-400 transition-transform duration-200", profileOpen && "rotate-180")} />
           </button>
-          {profileOpen ? (
-            <div className="glass-panel-strong absolute right-0 top-[calc(100%+.6rem)] z-50 w-72 rounded-2xl p-3 text-left">
-              <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.045] p-3">
-                <ShieldCheck className="h-5 w-5 text-emerald-200" />
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-semibold text-zinc-50">{fullName || "Admin"}</div>
-                  <div className="truncate text-xs" style={admin?.roleColor ? { color: admin.roleColor } : undefined}>{admin?.roleLabel || "Authenticated"}</div>
+          <AnimatePresence>
+            {profileOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: -6 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -6 }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
+                className="glass-panel-strong absolute right-0 top-[calc(100%+.6rem)] z-50 w-72 rounded-2xl p-3 text-left"
+              >
+                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.045] p-3">
+                  <ShieldCheck className="h-5 w-5 text-emerald-200" />
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-semibold text-zinc-50">{fullName || "Admin"}</div>
+                    <div className="truncate text-xs" style={admin?.roleColor ? { color: admin.roleColor } : undefined}>{admin?.roleLabel || "Authenticated"}</div>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
-                  <div className="text-xs text-zinc-400">Permissions</div>
-                  <div className="mt-1 text-lg font-semibold text-zinc-50">{permissions.length}</div>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+                    <div className="text-xs text-zinc-400">Permissions</div>
+                    <div className="mt-1 text-lg font-semibold text-zinc-50">{permissions.length}</div>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+                    <div className="text-xs text-zinc-400">Status</div>
+                    <div className="mt-1 text-sm font-semibold text-emerald-200">Online</div>
+                  </div>
                 </div>
-                <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
-                  <div className="text-xs text-zinc-400">Status</div>
-                  <div className="mt-1 text-sm font-semibold text-emerald-200">Online</div>
-                </div>
-              </div>
-              <Link href="/panel/settings" onClick={() => setProfileOpen(false)} className="mt-3 block rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-zinc-200 transition-colors hover:bg-white/[0.075]">
-                Profile settings
-              </Link>
-            </div>
-          ) : null}
+                <Link href="/panel/settings" onClick={() => setProfileOpen(false)} className="mt-3 block rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-zinc-200 transition-colors duration-150 hover:bg-white/[0.075]">
+                  Profile settings
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         <button
           onClick={logout}
           aria-label="Log out"
-          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.055] px-3 py-2 text-sm text-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,.08)] transition-colors duration-200 hover:border-sky-200/20 hover:bg-white/[0.09] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+          className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.055] px-3 py-2 text-sm text-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,.08)] transition-colors duration-150 hover:border-sky-200/20 hover:bg-white/[0.09] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
         >
-          <LogOut className="h-4 w-4 text-indigo-200" />
+          <LogOut className="h-4 w-4 text-zinc-300" />
           Logout
         </button>
       </div>
@@ -168,8 +178,8 @@ function StatusPill({ icon, label, value }: { icon: React.ReactNode; label: stri
     <div className="glass-soft flex items-center gap-2 rounded-xl px-3 py-2">
       {icon}
       <div className="leading-none">
-        <div className="text-[10px] uppercase tracking-wide text-zinc-300/60">{label}</div>
-        <div className="mt-1 text-xs font-semibold text-zinc-100">{value}</div>
+        <div className="text-[10px] font-medium tracking-[0.04em] text-zinc-400">{label}</div>
+        <div className="mt-0.5 text-xs font-semibold text-zinc-100">{value}</div>
       </div>
     </div>
   );

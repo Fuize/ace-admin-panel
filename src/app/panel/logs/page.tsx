@@ -1,14 +1,12 @@
-import { EmptyState, PageHeader } from "@/components/PanelPrimitives";
+import { ResourceReadyPage } from "@/components/ResourceReadyPage";
 
 export default function LogsPage() {
   return (
-    <div>
-      <PageHeader
-        title="Logs"
-        description="Ready for future Supabase audit logs and RAGE:MP server events."
-        stats={[{ label: "Source", value: "Supabase ready" }]}
-      />
-      <EmptyState title="No Supabase data connected yet" description="This section is ready for future Supabase audit logs and RAGE:MP sync." />
-    </div>
+    <ResourceReadyPage
+      title="Logs"
+      description="Search, sort, and inspect future server logs after RAGE:MP/Supabase sync is connected."
+      columns={["Time", "Type", "Actor", "Target", "Message"]}
+      emptyDescription="This section is ready for future Supabase server logs and RAGE:MP sync."
+    />
   );
 }

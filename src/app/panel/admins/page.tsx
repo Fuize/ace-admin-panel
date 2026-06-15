@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { EmptyState, PageHeader, TableShell, TableSkeleton, rowClass, tableHeadClass, tdClass, thClass } from "@/components/PanelPrimitives";
+import { DataToolbar } from "@/components/DataToolbar";
 
 type AdminUser = {
   id: number;
@@ -14,6 +15,7 @@ type AdminUser = {
 export default function AdminsPage() {
   const [data, setData] = useState<AdminUser[] | { error: string }>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     fetch("/api/admin-users")
@@ -23,13 +25,21 @@ export default function AdminsPage() {
   }, []);
 
   const hasError = !Array.isArray(data);
+  const rows = Array.isArray(data)
+    ? data.filter((admin) => `${admin.id} ${admin.username} ${admin.role} ${admin.adminLevel}`.toLowerCase().includes(search.toLowerCase()))
+    : [];
 
   return (
     <div>
       <PageHeader
         title="Admins"
-        description="Approved Supabase admin profiles and ranks. This is a read-only view for now."
-        stats={[{ label: "Loaded", value: loading || hasError ? "-" : data.length }]}
+        description="Approved Supabase admin profiles and ranks. Management actions are prepared but stay locked until write policies are approved."
+        stats={[{ label: "Loaded", value: loading || hasError ? "-" : data.length }, { label: "Visible", value: loading || hasError ? "-" : rows.length }]}
+      />
+      <DataToolbar
+        search={search}
+        onSearch={setSearch}
+        right={<span className="rounded-xl border border-amber-200/15 bg-amber-300/10 px-3 py-2 text-xs text-amber-100">Admin create/disable requires future RLS write phase</span>}
       />
       <TableShell minWidth="760px">
         <thead className={tableHeadClass}>
@@ -46,10 +56,10 @@ export default function AdminsPage() {
             <TableSkeleton columns={5} />
           ) : hasError ? (
             <tr><td className="p-4" colSpan={5}><EmptyState title="Unauthorized" description="Sign in again to view admins." /></td></tr>
-          ) : data.length === 0 ? (
+          ) : rows.length === 0 ? (
             <tr><td className="p-4" colSpan={5}><EmptyState title="No admins found" description="Add approved admins in Supabase." /></td></tr>
           ) : (
-            data.map((admin) => (
+            rows.map((admin) => (
               <tr key={admin.id} className={rowClass}>
                 <td className={tdClass}>{admin.id}</td>
                 <td className={tdClass}>{admin.username}</td>

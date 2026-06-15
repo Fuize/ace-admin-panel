@@ -1,6 +1,17 @@
 import type { Metadata } from "next";
 import "./globals.css";
-export const metadata: Metadata = { title: "Server Admin Panel", description: "Admin Panel" };
+
+export const metadata: Metadata = {
+  title: {
+    default: "ACE Admin Panel",
+    template: "%s | ACE Admin Panel",
+  },
+  description: "Premium ACE staff operations dashboard",
+  icons: {
+    icon: "/favicon.ico",
+  },
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (<html lang="en"><body>{children}</body></html>);
 }

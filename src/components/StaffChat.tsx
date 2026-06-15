@@ -6,6 +6,8 @@ import { FormEvent, memo, useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseConfig } from "@/lib/supabase/client";
 import { isRecentlyActive } from "@/lib/supabase/presence";
 import { useAuth } from "@/components/AuthProvider";
+import { useNotifier } from "@/components/NotificationProvider";
+import { useUX } from "@/components/UXProvider";
 
 type ChatMessage = {
   id: string;
@@ -60,24 +62,44 @@ function initials(name: string) {
   return name.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "A";
 }
 
+function dedupePresence(rows: PresenceRow[]) {
+  const byAdmin = new Map<string, PresenceRow>();
+
+  for (const row of rows) {
+    const existing = byAdmin.get(row.admin_id);
+    if (!existing || new Date(row.last_heartbeat).getTime() > new Date(existing.last_heartbeat).getTime()) {
+      byAdmin.set(row.admin_id, row);
+    }
+  }
+
+  return Array.from(byAdmin.values()).sort((a, b) => new Date(b.last_heartbeat).getTime() - new Date(a.last_heartbeat).getTime());
+}
+
 const senderProfileSelect = "sender:admins!staff_chat_messages_sender_admin_id_fkey(display_name,display_lastname,role:admin_roles!admins_role_id_fkey(label,color))";
 const presenceProfileSelect = "admin:admins!admin_presence_admin_id_fkey(display_name,display_lastname,role:admin_roles!admins_role_id_fkey(label,color))";
 
 export function StaffChat() {
   const { admin, hasPermission, loading } = useAuth();
+  const { notify } = useNotifier();
+  const { chatUnread, clearChatUnread, incrementChatUnread } = useUX();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [presence, setPresence] = useState<PresenceRow[]>([]);
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [supabase, setSupabase] = useState<AppSupabaseClient | null>(null);
-  const [sessionId] = useState(() => crypto.randomUUID());
   const listRef = useRef<HTMLDivElement | null>(null);
+  const openRef = useRef(open);
+
+  useEffect(() => {
+    openRef.current = open;
+    if (open) clearChatUnread();
+  }, [clearChatUnread, open]);
 
   const canView = hasPermission("staff_chat.view");
   const canSend = hasPermission("staff_chat.send");
   const onlineAdmins = useMemo(() => (
-    presence.filter((row) => row.status === "online" && isRecentlyActive(row.last_heartbeat))
+    dedupePresence(presence).filter((row) => row.status === "online" && isRecentlyActive(row.last_heartbeat))
   ), [presence]);
 
   useEffect(() => {
@@ -105,7 +127,7 @@ export function StaffChat() {
     if (!supabase || !canView) return;
     const client = supabase;
 
-    async function loadInitialData() {
+    async function loadMessages() {
       const { data: messageRows, error: messageError } = await client
         .from("staff_chat_messages")
         .select(`id,sender_admin_id,body,created_at,${senderProfileSelect}`)
@@ -121,32 +143,47 @@ export function StaffChat() {
 
       setError(null);
       setMessages(((messageRows || []) as ChatMessage[]).reverse());
+    }
 
+    async function loadPresence() {
       const { data: presenceRows, error: presenceError } = await client
         .from("admin_presence")
         .select(`id,admin_id,status,last_heartbeat,${presenceProfileSelect}`)
         .order("last_heartbeat", { ascending: false })
-        .limit(30);
+        .limit(100);
 
       if (!presenceError) {
-        setPresence((presenceRows || []) as PresenceRow[]);
+        setPresence(dedupePresence((presenceRows || []) as PresenceRow[]));
       } else {
         console.error("Staff presence load failed", presenceError);
       }
     }
 
+    async function loadInitialData() {
+      await Promise.all([loadMessages(), loadPresence()]);
+    }
+
     void loadInitialData();
+    const presencePoll = window.setInterval(() => void loadPresence(), 15_000);
 
     const channel = client
       .channel("ace-staff-chat")
-      .on("postgres_changes", { event: "*", schema: "public", table: "staff_chat_messages" }, () => void loadInitialData())
-      .on("postgres_changes", { event: "*", schema: "public", table: "admin_presence" }, () => void loadInitialData())
+      .on("postgres_changes", { event: "*", schema: "public", table: "staff_chat_messages" }, (payload: any) => {
+        const senderAdminId = payload?.new?.sender_admin_id;
+        if (payload?.eventType === "INSERT" && senderAdminId && senderAdminId !== admin?.id) {
+          notify({ title: "New staff message", body: "A new message was posted in staff chat." });
+          if (!openRef.current || document.hidden) incrementChatUnread();
+        }
+        void loadMessages();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "admin_presence" }, () => void loadPresence())
       .subscribe();
 
     return () => {
+      window.clearInterval(presencePoll);
       void channel.unsubscribe();
     };
-  }, [canView, supabase]);
+  }, [admin?.id, canView, incrementChatUnread, notify, supabase]);
 
   useEffect(() => {
     if (!supabase || !admin || !canView) return;
@@ -156,21 +193,37 @@ export function StaffChat() {
     async function heartbeat(status: "online" | "offline" = "online") {
       await client.from("admin_presence").upsert({
         admin_id: adminId,
-        session_id: sessionId,
+        session_id: adminId,
         status,
         current_page: window.location.pathname,
         last_heartbeat: new Date().toISOString(),
-      }, { onConflict: "admin_id,session_id" });
+      }, { onConflict: "admin_id" });
     }
 
     void heartbeat("online");
-    const interval = window.setInterval(() => void heartbeat("online"), 30_000);
+    const interval = window.setInterval(() => void heartbeat("online"), 25_000);
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") void heartbeat("online");
+    };
+    const onFocus = () => {
+      void heartbeat("online");
+    };
+    const onPageHide = () => {
+      void heartbeat("offline");
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("pagehide", onPageHide);
 
     return () => {
       window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("pagehide", onPageHide);
       void heartbeat("offline");
     };
-  }, [admin, canView, sessionId, supabase]);
+  }, [admin, canView, supabase]);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
@@ -228,7 +281,7 @@ export function StaffChat() {
       <aside className="glass-panel-strong flex h-full max-h-screen flex-col overflow-hidden text-zinc-100">
       <div className="shrink-0 border-b border-white/10 bg-white/[0.025]">
         <div className="flex items-center gap-3 px-4 py-3">
-        <div className="grid h-9 w-9 place-items-center rounded-xl border border-sky-300/25 bg-sky-400/12 shadow-[0_0_18px_rgba(14,165,233,.20)]">
+        <div className="grid h-9 w-9 place-items-center rounded-xl border border-slate-600/60 bg-slate-900/70">
           <MessageSquare className="h-4 w-4 text-sky-200" />
         </div>
         <div className="min-w-0">
@@ -252,8 +305,8 @@ export function StaffChat() {
       <div className="shrink-0 border-b border-white/10 bg-white/[0.02] px-4 py-3">
         <div className="flex flex-wrap gap-2">
           {onlineAdmins.slice(0, 5).map((row) => (
-            <span key={row.id} className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.055] px-2 py-1 text-xs shadow-[inset_0_1px_0_rgba(255,255,255,.06)] backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_8px_rgba(110,231,183,.75)]" />
+            <span key={row.admin_id} className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.055] px-2 py-1 text-xs shadow-[inset_0_1px_0_rgba(255,255,255,.06)]">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
               <span className="max-w-24 truncate">{adminName(row.admin)}</span>
             </span>
           ))}
@@ -269,7 +322,7 @@ export function StaffChat() {
 
       {error ? <div className="mx-4 mb-3 shrink-0 rounded-lg border border-red-400/20 bg-red-500/10 px-3 py-2 text-xs text-red-200">{error}</div> : null}
 
-      <form onSubmit={sendMessage} className="shrink-0 border-t border-white/10 bg-white/[0.025] p-3 backdrop-blur-2xl">
+      <form onSubmit={sendMessage} className="shrink-0 border-t border-white/10 bg-white/[0.035] p-3">
         <label htmlFor="staff-chat-message" className="sr-only">Staff chat message</label>
         <div className="flex gap-2">
           <input
@@ -284,7 +337,7 @@ export function StaffChat() {
           <button
             type="submit"
             disabled={!canSend || !body.trim()}
-            className="grid h-10 w-10 place-items-center rounded-xl border border-sky-300/30 bg-sky-400/18 text-sky-50 shadow-[0_0_18px_rgba(14,165,233,.22),inset_0_1px_0_rgba(255,255,255,.09)] transition-colors duration-200 hover:bg-sky-400/30 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
+            className="grid h-10 w-10 place-items-center rounded-xl border border-sky-300/25 bg-sky-500/15 text-sky-50 transition-colors duration-200 hover:bg-sky-500/24 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300"
             aria-label="Send staff chat message"
           >
             <Send className="h-4 w-4" />
@@ -298,11 +351,19 @@ export function StaffChat() {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
-        className="fixed bottom-4 right-4 z-40 grid h-12 w-12 place-items-center rounded-full border border-sky-300/30 bg-sky-400/22 text-sky-50 shadow-[0_0_24px_rgba(14,165,233,.24)] backdrop-blur-md transition-colors hover:bg-sky-400/32 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 lg:hidden"
+        onClick={() => {
+          clearChatUnread();
+          setOpen(true);
+        }}
+        className="fixed bottom-4 right-4 z-40 grid h-12 w-12 place-items-center rounded-full border border-sky-300/30 bg-slate-900/85 text-sky-50 backdrop-blur-md transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 lg:hidden"
         aria-label="Open staff chat"
       >
         <MessageSquare className="h-5 w-5" />
+        {chatUnread > 0 ? (
+          <span className="absolute -right-1 -top-1 grid min-h-5 min-w-5 place-items-center rounded-full border border-zinc-950 bg-sky-300 px-1 text-[10px] font-bold text-zinc-950">
+            {chatUnread}
+          </span>
+        ) : null}
       </button>
       <div className="fixed inset-y-0 right-0 z-30 hidden w-[360px] lg:block">{content}</div>
       {open ? (
@@ -320,10 +381,10 @@ const ChatMessageBubble = memo(function ChatMessageBubble({ message }: { message
   const name = adminName(message.sender);
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.052] p-3 shadow-[0_12px_28px_rgba(0,0,0,.18),inset_0_1px_0_rgba(255,255,255,.075)] transition-colors duration-200 hover:border-sky-200/18 hover:bg-white/[0.075]" style={{ animation: "soft-pop .22s ease-out both" }}>
+    <div className="rounded-2xl border border-slate-700/70 bg-slate-900/46 p-3 transition-colors duration-200 hover:border-slate-500/70 hover:bg-slate-800/48" style={{ animation: "soft-pop .18s ease-out both" }}>
       <div className="flex items-start gap-3">
         <div className="relative grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-white/10 bg-white/[0.07] text-xs font-bold text-zinc-100 shadow-[inset_0_1px_0_rgba(255,255,255,.08)]">
-          <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border border-zinc-950 bg-emerald-300 shadow-[0_0_8px_rgba(110,231,183,.75)]" />
+          <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border border-zinc-950 bg-emerald-300" />
           {initials(name)}
         </div>
         <div className="min-w-0 flex-1">

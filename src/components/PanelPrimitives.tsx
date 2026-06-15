@@ -8,9 +8,9 @@ type PageHeaderProps = {
 
 export function PageHeader({ title, description, stats = [] }: PageHeaderProps) {
   return (
-    <div className="mb-7 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between" style={{ animation: "soft-pop .35s ease-out both" }}>
+    <div className="mb-7 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between" style={{ animation: "soft-pop .22s ease-out both" }}>
       <div>
-        <h1 className="text-2xl font-semibold tracking-normal text-zinc-50 drop-shadow-[0_0_20px_rgba(255,255,255,.14)]">{title}</h1>
+        <h1 className="text-2xl font-semibold tracking-normal text-zinc-50">{title}</h1>
         <p className="mt-1 max-w-3xl text-sm leading-6 text-zinc-300/90">{description}</p>
       </div>
       {stats.length > 0 ? (
@@ -49,9 +49,24 @@ export function TableShell({ children, minWidth = "760px" }: { children: React.R
 
 export function EmptyState({ title, description }: { title: string; description?: string }) {
   return (
-    <div className="glass-soft rounded-2xl border-dashed p-6 text-center" style={{ animation: "soft-pop .35s ease-out both" }}>
+    <div className="glass-soft relative overflow-hidden rounded-2xl border-dashed p-6 text-center" style={{ animation: "soft-pop .22s ease-out both" }}>
+      <div className="relative mx-auto mb-3 h-10 w-10 rounded-2xl border border-slate-600/60 bg-slate-900/70">
+        <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-300" />
+      </div>
       <div className="text-sm font-medium text-zinc-200">{title}</div>
       {description ? <div className="mt-1 text-sm text-zinc-300/75">{description}</div> : null}
+    </div>
+  );
+}
+
+export function AceLoader({ label = "Loading workspace..." }: { label?: string }) {
+  return (
+    <div className="glass-soft flex items-center gap-3 rounded-2xl p-4 text-sm text-zinc-200">
+      <span className="relative grid h-9 w-9 place-items-center rounded-xl border border-sky-300/20 bg-sky-400/10">
+        <span className="h-3 w-3 animate-ping rounded-full bg-sky-200/70" />
+        <span className="absolute h-2 w-2 rounded-full bg-sky-200 shadow-[0_0_14px_rgba(125,211,252,.75)]" />
+      </span>
+      <span>{label}</span>
     </div>
   );
 }
@@ -73,6 +88,6 @@ export function TableSkeleton({ columns, rows = 5 }: { columns: number; rows?: n
 }
 
 export const tableHeadClass = "sticky top-0 z-10 bg-white/[0.055] text-zinc-100 backdrop-blur-2xl shadow-[inset_0_-1px_0_rgba(255,255,255,.10)]";
-export const thClass = "whitespace-nowrap px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-300/90";
-export const tdClass = "whitespace-nowrap px-4 py-3.5 text-zinc-200";
+export const thClass = "density-head whitespace-nowrap px-4 py-3.5 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-300/90";
+export const tdClass = "density-cell whitespace-nowrap px-4 py-3.5 text-zinc-200";
 export const rowClass = "border-t border-white/8 odd:bg-white/[0.018] even:bg-white/[0.035] transition-colors duration-150 hover:bg-sky-200/[0.07] hover:shadow-[inset_3px_0_0_rgba(125,211,252,.38)]";

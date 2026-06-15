@@ -9,6 +9,7 @@ import webIcon from "../../../assets/ACEtransparent.png";
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -33,7 +34,10 @@ export default function LoginPage() {
         return;
       }
 
-      window.location.href = "/panel";
+      setSuccess(true);
+      window.setTimeout(() => {
+        window.location.href = "/panel";
+      }, 420);
     } catch {
       setError("Wrong username or password");
     } finally {
@@ -84,6 +88,19 @@ export default function LoginPage() {
           </button>
         </form>
       </motion.div>
+      {success ? (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 grid place-items-center bg-zinc-950/80 backdrop-blur-md"
+        >
+          <div className="glass-panel rounded-2xl px-6 py-5 text-center">
+            <div className="mx-auto mb-3 h-3 w-3 animate-ping rounded-full bg-sky-200" />
+            <div className="text-sm font-semibold text-zinc-50">Access approved</div>
+            <div className="mt-1 text-xs text-zinc-400">Opening admin workspace...</div>
+          </div>
+        </motion.div>
+      ) : null}
     </div>
   );
 }

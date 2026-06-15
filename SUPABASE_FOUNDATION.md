@@ -94,6 +94,22 @@ supabase/migrations/006_staff_chat_hourly_cleanup.sql
 
 It schedules deletion of `staff_chat_messages` older than 1 hour. It does not delete presence rows.
 
+The unique admin presence draft is stored at:
+
+```txt
+supabase/migrations/007_unique_admin_presence.sql
+```
+
+It removes duplicate presence rows per admin and enforces one `admin_presence` row per `admin_id`.
+
+The phase 6 productivity foundation draft is stored at:
+
+```txt
+supabase/migrations/008_phase6_admin_productivity_foundation.sql
+```
+
+It adds future synced game-data tables, audit/session read policies, and safe own-audit insert policy for app auth events.
+
 ## Manual SQL Apply Order
 
 When the database phase is approved, run SQL manually in the Supabase Dashboard SQL Editor in this exact order:
@@ -143,6 +159,18 @@ supabase/migrations/005_staff_chat_presence_policies.sql
 
 ```txt
 supabase/migrations/006_staff_chat_hourly_cleanup.sql
+```
+
+11. Run the unique admin presence cleanup/index:
+
+```txt
+supabase/migrations/007_unique_admin_presence.sql
+```
+
+12. Run the phase 6 productivity foundation:
+
+```txt
+supabase/migrations/008_phase6_admin_productivity_foundation.sql
 ```
 
 Do not run secrets in SQL. Do not paste service role keys, secret keys, JWT secrets, database passwords, or `.env.local` values into the SQL Editor.

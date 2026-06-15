@@ -11,48 +11,43 @@ body { @apply bg-zinc-950 text-zinc-100; }
 
 @layer utilities {
   .glass-panel {
-    background:
-      linear-gradient(145deg, rgba(18, 22, 42, .38), rgba(6, 8, 18, .24)),
-      radial-gradient(circle at 18% 0%, rgba(125, 92, 255, .10), transparent 32%);
-    border: 1px solid rgba(255, 255, 255, .085);
+    background: rgba(12, 16, 28, .66);
+    border: 1px solid rgba(148, 163, 184, .18);
     box-shadow:
-      0 22px 62px rgba(0, 0, 0, .24),
-      0 0 30px rgba(99, 102, 241, .045),
-      inset 0 1px 0 rgba(255, 255, 255, .09),
-      inset 0 0 24px rgba(125, 92, 255, .045);
-    backdrop-filter: blur(26px) saturate(145%);
+      0 16px 34px rgba(0, 0, 0, .24),
+      inset 0 1px 0 rgba(255, 255, 255, .055);
+    backdrop-filter: blur(14px) saturate(118%);
   }
 
   .glass-panel-strong {
-    background:
-      linear-gradient(150deg, rgba(12, 15, 32, .46), rgba(4, 6, 16, .30)),
-      radial-gradient(circle at 20% 12%, rgba(14, 165, 233, .10), transparent 30%);
-    border: 1px solid rgba(255, 255, 255, .085);
+    background: rgba(8, 13, 24, .74);
+    border: 1px solid rgba(148, 163, 184, .18);
     box-shadow:
-      0 26px 72px rgba(0, 0, 0, .31),
-      0 0 36px rgba(14, 165, 233, .05),
-      inset 0 1px 0 rgba(255, 255, 255, .10),
-      inset 0 0 28px rgba(14, 165, 233, .05);
-    backdrop-filter: blur(30px) saturate(150%);
+      0 18px 38px rgba(0, 0, 0, .30),
+      inset 0 1px 0 rgba(255, 255, 255, .055);
+    backdrop-filter: blur(16px) saturate(118%);
   }
 
   .glass-soft {
-    background: rgba(255, 255, 255, .042);
-    border: 1px solid rgba(255, 255, 255, .085);
+    background: rgba(15, 23, 42, .54);
+    border: 1px solid rgba(148, 163, 184, .16);
     box-shadow:
-      0 12px 30px rgba(0, 0, 0, .15),
-      inset 0 1px 0 rgba(255, 255, 255, .08);
-    backdrop-filter: blur(18px) saturate(135%);
+      0 8px 18px rgba(0, 0, 0, .12),
+      inset 0 1px 0 rgba(255, 255, 255, .045);
+    backdrop-filter: blur(8px) saturate(112%);
+  }
+
+  .glass-panel .glass-soft,
+  .glass-panel-strong .glass-soft {
+    backdrop-filter: none;
   }
 
   .ambient-orb {
-    will-change: transform, opacity;
-    animation: ambient-drift 36s ease-in-out infinite alternate;
+    animation: none;
   }
 
   .ambient-orb-slow {
-    will-change: transform, opacity;
-    animation: ambient-drift-slow 48s ease-in-out infinite alternate;
+    animation: none;
   }
 
   .glass-shimmer::before {
@@ -62,14 +57,42 @@ body { @apply bg-zinc-950 text-zinc-100; }
     pointer-events: none;
     background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.055) 18%, transparent 36%);
     transform: translateX(-120%);
-    will-change: transform, opacity;
-    animation: glass-shimmer 18s ease-in-out infinite;
+    animation: glass-shimmer 28s ease-in-out infinite;
   }
 
   .skeleton-shine {
     background: linear-gradient(90deg, rgba(255,255,255,.045), rgba(255,255,255,.095), rgba(255,255,255,.045));
     background-size: 220% 100%;
     animation: skeleton-sweep 2.4s ease-in-out infinite;
+  }
+
+  html[data-density="compact"] .density-cell {
+    padding-top: .55rem;
+    padding-bottom: .55rem;
+  }
+
+  html[data-density="compact"] .density-head {
+    padding-top: .65rem;
+    padding-bottom: .65rem;
+  }
+
+  html[data-glass="clear"] .glass-panel,
+  html[data-glass="clear"] .glass-panel-strong {
+    background: rgba(10, 15, 27, .58);
+  }
+
+  html[data-glass="deep"] .glass-panel,
+  html[data-glass="deep"] .glass-panel-strong {
+    background: rgba(9, 13, 24, .82);
+  }
+
+  html[data-motion="reduced"] *,
+  html[data-motion="reduced"] *::before,
+  html[data-motion="reduced"] *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .001ms !important;
   }
 }
 
@@ -95,6 +118,6 @@ body { @apply bg-zinc-950 text-zinc-100; }
 }
 
 @keyframes soft-pop {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(3px); }
   to { opacity: 1; transform: translateY(0); }
 }
